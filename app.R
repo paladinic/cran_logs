@@ -1,9 +1,12 @@
 library(shiny)
 library(shinyjs)
 library(shinythemes)
+library(shinycssloaders)
 library(cranlogs)
 library(plotly)
 library(DT)
+
+options(spinner.color="#000000")
 
 TRY = function (x, verbose = FALSE){
   tryCatch(x, error = function(e) {
@@ -24,25 +27,25 @@ ui <- fluidPage(
     sidebarPanel(
       textInput(
         inputId = 'lib',
-        label = 'library',
-        placeholder = 'R library (e.g. linea)'
+        label = 'Package',
+        placeholder = 'R Package(s) (e.g. linea,dplyr,shiny)'
       ),
       selectInput(
         inputId = 'when',
-        label = 'when',
-        choices = c('last-day', 'last-week', 'last-month')
+        label = 'Period',
+        choices = c('last-month','last-week','last-day')
       ),
-      actionButton(inputId = 'go', label = 'go',width = '100%'),
-      shinyjs::hidden(downloadButton(outputId = "download", "download data",style='width:100%;margin-top:7px;')),
+      actionButton(inputId = 'go', label = 'Go',width = '100%'),
+      shinyjs::hidden(downloadButton(outputId = "download", "Download Data",style='width:100%;margin-top:7px;')),
       hr(),
       textOutput(outputId = 'total')
     ),
     mainPanel(
       tabsetPanel(
         tabPanel('Plot',
-                 plotlyOutput(outputId = 'plt')),
+                 withSpinner(plotlyOutput(outputId = 'plt'))),
         tabPanel('Table',
-                 DT::dataTableOutput(outputId = 'tb'))
+                 withSpinner(DT::dataTableOutput(outputId = 'tb')))
       )
     )
   )
@@ -74,7 +77,7 @@ server <- function(input, output, session) {
     
     if (is.data.frame(df)) {
       plot_ly(data = df) %>%
-        add_lines(x = ~date,y = ~count)
+        add_lines(x = ~date,y = ~count,color=~package)
     }
     else{
     }
@@ -82,9 +85,9 @@ server <- function(input, output, session) {
   
   output$total = renderText({
     if(is.data.frame(get_data())){
-      paste0('Total: ',sum(get_data()$count))
+      paste0('Period Total: ',sum(get_data()$count))
     }else{
-      'Total: '
+      'Period Total: '
     }
   })
  
