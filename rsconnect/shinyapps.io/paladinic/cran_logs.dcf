@@ -5,7 +5,7 @@ account: paladinic
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 6465347
-bundleId: 5995743
+bundleId: 6042897
 url: https://paladinic.shinyapps.io/cran_logs/
-when: 1654854066.7108
-lastSyncTime: 1654854066.71081
+when: 1656188663.27536
+lastSyncTime: 1656188663.27537

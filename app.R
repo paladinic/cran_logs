@@ -18,6 +18,9 @@ TRY = function (x, verbose = FALSE){
 }
 
 ui <- fluidPage(
+  tags$head(
+    HTML('<link rel="shortcut icon" href="img/icon.png"/>')
+  ),
   theme = shinytheme('journal'),
   useShinyjs(),
   h2('CRAN LOGS'),
@@ -30,11 +33,7 @@ ui <- fluidPage(
         label = 'Package',
         placeholder = 'R Package(s) (e.g. linea,dplyr,shiny)'
       ),
-      selectInput(
-        inputId = 'when',
-        label = 'Period',
-        choices = c('last-month','last-week','last-day')
-      ),
+      dateRangeInput(inputId = 'date',label = 'dates',start = Sys.Date()-90,end=(Sys.Date()-1),max = (Sys.Date()-1)),
       actionButton(inputId = 'go', label = 'Go',width = '100%'),
       shinyjs::hidden(downloadButton(outputId = "download", "Download Data",style='width:100%;margin-top:7px;')),
       hr(),
@@ -55,7 +54,9 @@ server <- function(input, output, session) {
   get_data = reactiveVal(NA)
   
   observeEvent(input$go, {
-    df = cranlogs::cran_downloads(packages = input$lib,when = input$when) %>% 
+    df = cranlogs::cran_downloads(packages = input$lib,
+                                  from = input$date[1],
+                                  to = input$date[2]) %>% 
       TRY()
     if(is.null(df)){
       #show notif
@@ -110,5 +111,8 @@ server <- function(input, output, session) {
   )
    
 }
+
+options(shiny.host = '0.0.0.0')
+options(shiny.port = 8881)
 
 shinyApp(ui, server)
